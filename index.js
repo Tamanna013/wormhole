@@ -30,7 +30,7 @@ const renderScene = new RenderPass(scene, camera);
 composer.addPass(renderScene);
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 100);
 composer.addPass(bloomPass);
-bloomPass.threshold=0.002;
+bloomPass.threshold=0.01;
 bloomPass.strength=3.5;
 bloomPass.radius=0;
 
@@ -85,7 +85,7 @@ function animate(t=0){
     requestAnimationFrame(animate);
     controls.update();
     updateCamera(t);
-    composer.render(scene, camera);
+    composer.render();
 }
 
 animate();
