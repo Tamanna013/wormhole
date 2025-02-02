@@ -14,6 +14,7 @@ camera.position.set(0, 0, 5);
 const renderer=new THREE.WebGLRenderer();
 renderer.setSize(w, h);
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 2.5;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
@@ -31,7 +32,7 @@ composer.addPass(renderScene);
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 100);
 composer.addPass(bloomPass);
 bloomPass.threshold=0.01;
-bloomPass.strength=3.5;
+bloomPass.strength=5.5;
 bloomPass.radius=0;
 
 // create a line geometry from the spline
