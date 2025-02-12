@@ -14,7 +14,6 @@ camera.position.set(0, 0, 5);
 const renderer=new THREE.WebGLRenderer();
 renderer.setSize(w, h);
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 3.5;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
@@ -25,19 +24,15 @@ controls.dampingFactor = 0.03;
 // create a tube geometry from the spline
 const tubeGeometry = new THREE.TubeGeometry(spline, 222, 0.65, 16, true);
 
-const light = new THREE.PointLight(0xffffff, 10);
-light.position.set(0, 5, 5);
-scene.add(light);
-
 // postprocessing
 const composer = new EffectComposer(renderer);
 const renderScene = new RenderPass(scene, camera);
 composer.addPass(renderScene);
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 100);
 composer.addPass(bloomPass);
-bloomPass.threshold=0.0;
-bloomPass.strength=6.0;
-bloomPass.radius=1.0;
+bloomPass.threshold=0.002;
+bloomPass.strength=3.5;
+bloomPass.radius=0;
 
 // create a line geometry from the spline
 const points = spline.getPoints(100);
@@ -51,6 +46,27 @@ const lineMat = new THREE.LineBasicMaterial({ color: 0x5f5f5f });
 const tubeLines = new THREE.LineSegments(edges, lineMat);
 scene.add(tubeLines);
 
+// Create a point geometry for glowing vertices
+const vertices = tubeGeometry.attributes.position.array;
+const vertexPositions = new Float32Array(vertices.length);
+for (let i = 0; i < vertices.length; i++) {
+    vertexPositions[i] = vertices[i];
+}
+
+const vertexGeometry = new THREE.BufferGeometry();
+vertexGeometry.setAttribute('position', new THREE.BufferAttribute(vertexPositions, 3));
+
+const vertexMaterial = new THREE.PointsMaterial({
+    color: 0xff0000,
+    size: 0.06,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 1.0
+});
+
+const glowingVertices = new THREE.Points(vertexGeometry, vertexMaterial);
+scene.add(glowingVertices);
+
 const numBoxes = 55;
 const size=0.075;
 const boxGeometry = new THREE.BoxGeometry(size, size, size);
@@ -58,7 +74,7 @@ for(let i=0; i<numBoxes; i++){
     const boxMaterial = new THREE.MeshStandardMaterial({
         color: 0xff0000,
         emissive: 0xff0000,
-        emissiveIntensity: 8
+        emissiveIntensity: 2.5
     });
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
     const p = (i / numBoxes + Math.random() * 0.1) % 1;
@@ -90,7 +106,7 @@ function animate(t=0){
     requestAnimationFrame(animate);
     controls.update();
     updateCamera(t);
-    composer.render();
+    composer.render(scene, camera);
 }
 
 animate();
